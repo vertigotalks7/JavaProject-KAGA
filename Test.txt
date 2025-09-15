@@ -1,2 +1,58 @@
 Angelo
 Kevin
+BrainBuzz/
+│── README.md                 # Project overview, setup instructions
+│── pom.xml / build.gradle    # Dependency manager (if using Maven/Gradle)
+│── /docs
+│   └── ProjectReport.pdf      # Your formal report (the one you uploaded)
+│
+├── /src
+│   ├── /main
+│   │   ├── /java/com/brainbuzz
+│   │   │   ├── /model          # Core data entities
+│   │   │   │   ├── User.java              // Stores userId, username, passwordHash
+│   │   │   │   ├── Category.java          // Quiz categories (Math, CS, etc.)
+│   │   │   │   ├── Question.java          // A question with text, explanation
+│   │   │   │   ├── Option.java            // Multiple-choice option (correct/wrong)
+│   │   │   │   ├── QuizResult.java        // Stores score, totalQns, dateTaken
+│   │   │   │
+│   │   │   ├── /ui             # Swing-based UI frames
+│   │   │   │   ├── LoginFrame.java        // Login screen
+│   │   │   │   ├── RegistrationFrame.java // Signup with validation
+│   │   │   │   ├── DashboardFrame.java    // User hub: start quiz, history, etc.
+│   │   │   │   ├── QuizFrame.java         // Shows one question at a time, handles timer
+│   │   │   │   ├── ResultsFrame.java      // Displays score + explanations
+│   │   │   │   ├── HistoryFrame.java      // Shows past quiz attempts
+│   │   │   │   ├── LeaderboardFrame.java  // Shows top performers
+│   │   │   │   ├── TroubleshootFrame.java // Ticket system for issues
+│   │   │   │   ├── AdminPanelFrame.java   // Admin dashboard: manage Qs, users, tickets
+│   │   │   │
+│   │   │   ├── /service        # Business logic
+│   │   │   │   ├── UserService.java       // Authentication, registration logic
+│   │   │   │   ├── QuizService.java       // Quiz flow, scoring, timing
+│   │   │   │   ├── AdminService.java      // Admin-specific content management
+│   │   │   │
+│   │   │   ├── /dao            # Database interaction (CRUD)
+│   │   │   │   ├── UserDAO.java            // User CRUD
+│   │   │   │   ├── QuestionDAO.java        // Question + Option CRUD
+│   │   │   │   ├── QuizResultDAO.java      // Store/retrieve quiz results
+│   │   │   │
+│   │   │   ├── /util           # Helper utilities
+│   │   │   │   ├── DatabaseManager.java   // Singleton DB connection
+│   │   │   │   ├── PasswordUtil.java      // Hashing + verification
+│   │   │   │
+│   │   │   ├── MainApp.java    // Entry point → launches LoginFrame
+│   │   │
+│   │   └── /resources
+│   │       ├── schema.sql      // DB initialization script
+│   │       ├── application.properties  // DB config, app settings
+│   │       └── icons/          // UI icons (buttons, logos)
+│   │
+│   └── /test
+│       ├── UserServiceTest.java
+│       ├── QuizServiceTest.java
+│       ├── PasswordUtilTest.java
+│       └── DAOTests/...
+│
+└── /out (or /target if Maven)
+    └── compiled bytecode, JAR files
