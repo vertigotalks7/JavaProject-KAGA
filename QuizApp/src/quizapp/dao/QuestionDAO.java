@@ -12,8 +12,14 @@ import java.util.Map;
 
 public class QuestionDAO {
 
+    /**
+     * Retrieves questions for a category, including options, using a single JOIN.
+     * Use Integer.MAX_VALUE for limit to get all questions.
+     */
     public List<Question> getQuestionsForCategory(int categoryId, int limit) {
-        Map<Integer, Question> questionMap = new LinkedHashMap<>();
+        Map<Integer, Question> questionMap = new LinkedHashMap<>(); // Preserves random order
+
+        // Subquery ensures LIMIT applies *before* JOIN, crucial for performance and correctness
         String sql = "SELECT q.id AS question_id, q.question_text, q.category_id, o.option_text, o.is_correct " +
                 "FROM (SELECT * FROM questions WHERE category_id = ? ORDER BY RAND() LIMIT ?) AS q " +
                 "JOIN options o ON q.id = o.question_id";
@@ -22,37 +28,44 @@ public class QuestionDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, categoryId);
-            stmt.setInt(2, limit);
+            stmt.setInt(2, limit); // Use the passed limit
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int qId = rs.getInt("question_id");
 
-                    Question question = questionMap.get(qId);
-                    if (question == null) {
-                        question = new Question(
-                                qId, // Pass the ID to the model
-                                rs.getString("question_text"),
-                                new ArrayList<>(),
-                                rs.getInt("category_id")
-                        );
-                        questionMap.put(qId, question);
-                    }
+                    // Add question to map if not already present
+                    Question question = questionMap.computeIfAbsent(qId, k -> {
+                        try {
+                            return new Question(
+                                    qId,
+                                    rs.getString("question_text"),
+                                    new ArrayList<>(), // Initialize with empty list
+                                    rs.getInt("category_id")
+                            );
+                        } catch (SQLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
 
+                    // Add the current option to the question's list
                     Option option = new Option(
                             rs.getString("option_text"),
                             rs.getBoolean("is_correct")
                     );
-
                     question.getOptions().add(option);
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching questions/options: " + e.getMessage());
             e.printStackTrace();
         }
         return new ArrayList<>(questionMap.values());
     }
 
+    /**
+     * Deletes a question and its associated options (due to CASCADE constraint).
+     */
     public void deleteQuestion(int questionId) {
         String sql = "DELETE FROM questions WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
@@ -60,10 +73,14 @@ public class QuestionDAO {
             stmt.setInt(1, questionId);
             stmt.executeUpdate();
         } catch (SQLException e) {
+            System.err.println("Error deleting question: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
+    /**
+     * Adds a new question and its options within a transaction.
+     */
     public void addQuestionWithOptions(int categoryId, String questionText, List<Option> options) {
         String questionSql = "INSERT INTO questions (category_id, question_text) VALUES (?, ?)";
         String optionSql = "INSERT INTO options (question_id, option_text, is_correct) VALUES (?, ?, ?)";
@@ -74,6 +91,7 @@ public class QuestionDAO {
             conn.setAutoCommit(false); // Start transaction
 
             int questionId;
+            // Insert question, get generated ID
             try (PreparedStatement questionStmt = conn.prepareStatement(questionSql, Statement.RETURN_GENERATED_KEYS)) {
                 questionStmt.setInt(1, categoryId);
                 questionStmt.setString(2, questionText);
@@ -88,6 +106,7 @@ public class QuestionDAO {
                 }
             }
 
+            // Insert options using batching
             try (PreparedStatement optionStmt = conn.prepareStatement(optionSql)) {
                 for (Option option : options) {
                     optionStmt.setInt(1, questionId);
@@ -98,12 +117,14 @@ public class QuestionDAO {
                 optionStmt.executeBatch();
             }
 
-            conn.commit();
+            conn.commit(); // Commit if all inserts succeed
 
         } catch (SQLException e) {
+            System.err.println("Error adding question with options: " + e.getMessage());
             if (conn != null) {
                 try {
-                    conn.rollback();
+                    System.err.println("Transaction is being rolled back.");
+                    conn.rollback(); // Rollback on error
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -112,7 +133,7 @@ public class QuestionDAO {
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true);
+                    conn.setAutoCommit(true); // Restore default behavior
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

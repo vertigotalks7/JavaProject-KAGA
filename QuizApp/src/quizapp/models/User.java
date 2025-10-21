@@ -17,7 +17,13 @@ public class User {
 
     public int getId() { return id; }
     public String getUsername() { return username; }
-    public String getPassword() { return password; }
+    public String getPassword() { return password; } // Be careful exposing passwords
     public String getEmail() { return email; }
     public boolean isAdmin() { return isAdmin; }
+
+    @Override
+    public String toString() { // Useful for JList display
+        String role = isAdmin ? " (Admin)" : "";
+        return username + " - " + email + role;
+    }
 }

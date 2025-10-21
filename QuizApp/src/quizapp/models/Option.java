@@ -9,11 +9,6 @@ public class Option {
         this.isCorrect = isCorrect;
     }
 
-    public String getOptionText() {
-        return optionText;
-    }
-
-    public boolean isCorrect() {
-        return isCorrect;
-    }
+    public String getOptionText() { return optionText; }
+    public boolean isCorrect() { return isCorrect; }
 }

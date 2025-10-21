@@ -17,9 +17,9 @@ public class DeleteContentDialog extends JDialog {
     private final MainApp mainApp;
     private JList<Category> categoryList;
     private DefaultListModel<Category> categoryListModel;
-    private JList<String> questionList;
+    private JList<String> questionList; // Displaying question text
     private DefaultListModel<String> questionListModel;
-    private List<Question> currentQuestions;
+    private List<Question> currentQuestions; // Store actual Question objects
 
     public DeleteContentDialog(Frame parent) {
         super(parent, "Delete Content", true);
@@ -43,7 +43,12 @@ public class DeleteContentDialog extends JDialog {
         categoryList = new JList<>(categoryListModel);
         categoryList.setFont(Theme.getFont(Theme.FONT_BODY));
         categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        categoryList.addListSelectionListener(e -> loadQuestionsForCategory());
+        // Add listener AFTER model is initialized
+        categoryList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) { // Prevent double events
+                loadQuestionsForCategory();
+            }
+        });
 
         JPanel categoryButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         categoryButtons.setOpaque(false);
@@ -73,18 +78,18 @@ public class DeleteContentDialog extends JDialog {
         questionPanel.add(questionButtons, BorderLayout.SOUTH);
 
         JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, categoryPanel, questionPanel);
-        splitPane.setDividerLocation(200);
+        splitPane.setDividerLocation(200); // Adjust initial split
         contentPanel.add(splitPane, BorderLayout.CENTER);
 
         // Bottom panel
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         bottomPanel.setOpaque(false);
         JButton closeBtn = new StyledButton("Close");
-        closeBtn.addActionListener(e -> dispose());
+        closeBtn.addActionListener(e -> dispose()); // Close the dialog
         bottomPanel.add(closeBtn);
         contentPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        refreshData();
+        refreshData(); // Load data when dialog is created
         add(contentPanel);
     }
 
@@ -101,13 +106,16 @@ public class DeleteContentDialog extends JDialog {
         for (Category category : categories) {
             categoryListModel.addElement(category);
         }
-        questionListModel.clear();
+        questionListModel.clear(); // Clear questions when refreshing categories
+        currentQuestions = null; // Reset current questions
     }
 
     private void loadQuestionsForCategory() {
         questionListModel.clear();
+        currentQuestions = null; // Reset
         Category selectedCategory = categoryList.getSelectedValue();
         if (selectedCategory != null) {
+            // Fetch ALL questions for the selected category for admin view
             currentQuestions = mainApp.getQuizService().getQuestionsForCategory(selectedCategory, Integer.MAX_VALUE);
             for (Question q : currentQuestions) {
                 questionListModel.addElement(q.getQuestionText());
@@ -117,24 +125,40 @@ public class DeleteContentDialog extends JDialog {
 
     private void deleteCategory() {
         Category selected = categoryList.getSelectedValue();
-        if (selected == null) return;
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Please select a category to delete.", "No Category Selected", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Delete category '" + selected.getName() + "' and all its questions?", "Confirm", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete category '" + selected.getName() + "'?\nThis will permanently delete all associated questions and answers!",
+                "Confirm Category Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
             mainApp.getQuizService().deleteCategory(selected.getId());
-            refreshData();
+            refreshData(); // Refresh both lists
         }
     }
 
     private void deleteQuestion() {
         int selectedIndex = questionList.getSelectedIndex();
-        if (selectedIndex == -1) return;
+        if (selectedIndex == -1 || currentQuestions == null || selectedIndex >= currentQuestions.size()) {
+            JOptionPane.showMessageDialog(this, "Please select a question to delete.", "No Question Selected", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
-        int confirm = JOptionPane.showConfirmDialog(this, "Delete this question?", "Confirm", JOptionPane.YES_NO_OPTION);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Delete this question?",
+                "Confirm Question Deletion",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
         if (confirm == JOptionPane.YES_OPTION) {
             Question selectedQuestion = currentQuestions.get(selectedIndex);
             mainApp.getQuizService().deleteQuestion(selectedQuestion.getId());
-            loadQuestionsForCategory();
+            loadQuestionsForCategory(); // Refresh only the question list
         }
     }
 }

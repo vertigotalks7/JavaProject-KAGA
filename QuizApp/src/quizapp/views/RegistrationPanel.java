@@ -92,6 +92,7 @@ public class RegistrationPanel extends JPanel {
         gbc.gridy++; gbc.gridwidth = 2; leftPanel.add(signupButton, gbc);
         gbc.gridy++; leftPanel.add(loginButton, gbc);
 
+        // Right Panel (Image)
         rightPanel.setBackground(Color.WHITE);
         rightPanel.setLayout(new GridBagLayout());
         JLabel imageLabel = new JLabel();
@@ -99,6 +100,7 @@ public class RegistrationPanel extends JPanel {
             imageLabel.setIcon(new ImageIcon(getClass().getResource("/icons/signup.jpg")));
         } catch (Exception e) {
             imageLabel.setText("Image not found");
+            System.err.println("Signup image not found: /icons/signup.jpg. Error: " + e.getMessage());
         }
         rightPanel.add(imageLabel);
 
@@ -114,8 +116,9 @@ public class RegistrationPanel extends JPanel {
         String name = nameField.getText().trim();
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
-        String emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$";
+        String emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"; // Simple email regex
 
+        // Basic Validation
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -124,14 +127,27 @@ public class RegistrationPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please enter a valid email address.", "Invalid Email", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        if (mainApp.getUserService().isEmailTaken(email)) {
-            JOptionPane.showMessageDialog(this, "This email is already registered.", "Error", JOptionPane.ERROR_MESSAGE);
+        // Basic password length check (example)
+        if (password.length() < 4) {
+            JOptionPane.showMessageDialog(this, "Password must be at least 4 characters long.", "Weak Password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        // Check if email is already taken
+        if (mainApp.getUserService().isEmailTaken(email)) {
+            JOptionPane.showMessageDialog(this, "This email is already registered.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        // If validation passes, register the user
         mainApp.getUserService().registerUser(name, email, password);
         JOptionPane.showMessageDialog(this, "Registration successful! Please log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
-        mainApp.getLoginPanel().setEmail(email);
+
+        // Clear fields and navigate to login, pre-filling email
+        nameField.setText("");
+        emailField.setText("");
+        passwordField.setText("");
+        mainApp.getLoginPanel().setEmail(email); // Pre-fill email on login screen
         mainApp.showPanel("login");
     }
 }

@@ -1,10 +1,7 @@
 package quizapp.views;
 
 import quizapp.MainApp;
-import quizapp.models.Category;
-import quizapp.models.Option;
-import quizapp.models.Question;
-import quizapp.models.QuizResult;
+import quizapp.models.*; // Import UserAnswer
 import quizapp.utils.Theme;
 import quizapp.views.components.StyledButton;
 
@@ -20,7 +17,6 @@ import java.util.Map;
 
 public class QuizPanel extends JPanel {
 
-    // --- UPDATED CONSTANTS ---
     private static final int QUIZ_TIME_SECONDS = 300; // 5 minutes
     private static final int QUESTIONS_PER_QUIZ = 15;
 
@@ -37,9 +33,9 @@ public class QuizPanel extends JPanel {
     private ButtonGroup optionsGroup;
     private Timer quizTimer;
 
-    // --- NEW NAVIGATION BUTTONS ---
     private StyledButton previousButton;
     private StyledButton nextButton;
+    private StyledButton exitButton;
 
     public QuizPanel(MainApp mainApp) {
         this.mainApp = mainApp;
@@ -70,6 +66,7 @@ public class QuizPanel extends JPanel {
         setBackground(Color.WHITE);
         setBorder(new EmptyBorder(20, 40, 40, 40));
 
+        // --- Top Panel ---
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         questionNumberLabel = new JLabel();
@@ -79,9 +76,9 @@ public class QuizPanel extends JPanel {
         topPanel.add(questionNumberLabel, BorderLayout.WEST);
         topPanel.add(timerLabel, BorderLayout.EAST);
 
+        // --- Center Panel ---
         JPanel centerPanel = new JPanel(new BorderLayout(20, 20));
         centerPanel.setOpaque(false);
-
         questionTextArea = new JTextArea();
         questionTextArea.setFont(Theme.getFont(Theme.FONT_BODY_BOLD));
         questionTextArea.setWrapStyleWord(true);
@@ -89,24 +86,29 @@ public class QuizPanel extends JPanel {
         questionTextArea.setEditable(false);
         questionTextArea.setFocusable(false);
         questionTextArea.setOpaque(false);
-
         optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.setOpaque(false);
-
         centerPanel.add(questionTextArea, BorderLayout.NORTH);
         centerPanel.add(optionsPanel, BorderLayout.CENTER);
 
-        // --- UPDATED NAVIGATION PANEL ---
+        // --- Bottom Navigation Panel ---
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
         previousButton = new StyledButton("Previous");
         nextButton = new StyledButton("Next");
+        exitButton = new StyledButton("Exit Quiz");
 
         previousButton.addActionListener(e -> navigateToPreviousQuestion());
         nextButton.addActionListener(e -> navigateToNextQuestion());
+        exitButton.addActionListener(e -> exitQuiz());
 
-        bottomPanel.add(previousButton, BorderLayout.WEST);
+        JPanel leftButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        leftButtonPanel.setOpaque(false);
+        leftButtonPanel.add(previousButton);
+        leftButtonPanel.add(exitButton);
+
+        bottomPanel.add(leftButtonPanel, BorderLayout.WEST);
         bottomPanel.add(nextButton, BorderLayout.EAST);
 
         add(topPanel, BorderLayout.NORTH);
@@ -134,7 +136,6 @@ public class QuizPanel extends JPanel {
             radioButton.setActionCommand(option.getOptionText());
             optionsGroup.add(radioButton);
 
-            // Restore the user's previous selection for this question
             if (previousAnswer != null && option.getOptionText().equals(previousAnswer.getOptionText())) {
                 radioButton.setSelected(true);
             }
@@ -150,6 +151,7 @@ public class QuizPanel extends JPanel {
 
     private void updateNavigationButtons() {
         previousButton.setEnabled(currentQuestionIndex > 0);
+        exitButton.setEnabled(true);
         if (currentQuestionIndex == questionList.size() - 1) {
             nextButton.setText("Submit");
         } else {
@@ -158,7 +160,7 @@ public class QuizPanel extends JPanel {
     }
 
     private void saveCurrentAnswer() {
-        if (optionsGroup.getSelection() != null) {
+        if (optionsGroup != null && optionsGroup.getSelection() != null) {
             String selectedOptionText = optionsGroup.getSelection().getActionCommand();
             Question currentQuestion = questionList.get(currentQuestionIndex);
             for (Option opt : currentQuestion.getOptions()) {
@@ -188,6 +190,23 @@ public class QuizPanel extends JPanel {
         }
     }
 
+    private void exitQuiz() {
+        if (quizTimer != null) {
+            quizTimer.stop();
+        }
+        int choice = JOptionPane.showConfirmDialog(
+                this, "Are you sure you want to exit the quiz?\nYour progress will not be saved.",
+                "Confirm Exit", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+        if (choice == JOptionPane.YES_OPTION) {
+            mainApp.showPanel("dashboard");
+        } else {
+            if (quizTimer != null && !quizTimer.isRunning()) {
+                quizTimer.start();
+            }
+        }
+    }
+
     private void startTimer() {
         if (quizTimer != null) {
             quizTimer.stop();
@@ -210,18 +229,33 @@ public class QuizPanel extends JPanel {
         if (quizTimer != null) {
             quizTimer.stop();
         }
-
-        // Make sure the very last answer is saved
-        saveCurrentAnswer();
+        saveCurrentAnswer(); // Save the final answer
 
         int score = 0;
+        List<UserAnswer> answerLog = new ArrayList<>(); // List to hold individual answers
+
         for (Question q : questionList) {
             Option userAnswer = userAnswers.get(q);
-            if (userAnswer != null && userAnswer.isCorrect()) {
+            // Default to incorrect if no answer was selected or stored
+            boolean wasCorrect = (userAnswer != null && userAnswer.isCorrect());
+
+            if (wasCorrect) {
                 score++;
             }
+
+            // Log every answer attempt (even if unanswered, logged as incorrect)
+            answerLog.add(new UserAnswer(
+                    mainApp.getCurrentUser().getId(),
+                    q.getId(),
+                    q.getCategoryId(), // Use the category ID from the question object
+                    wasCorrect
+            ));
         }
 
+        // Save the detailed answers to the new user_answers table
+        mainApp.getQuizService().saveUserAnswers(answerLog);
+
+        // Save the overall quiz result (as before)
         QuizResult result = new QuizResult(
                 mainApp.getCurrentUser().getId(),
                 currentCategory.getId(),
@@ -231,6 +265,7 @@ public class QuizPanel extends JPanel {
                 new Timestamp(System.currentTimeMillis())
         );
         mainApp.getQuizService().saveResult(result);
+
         mainApp.showResults(result);
     }
 }

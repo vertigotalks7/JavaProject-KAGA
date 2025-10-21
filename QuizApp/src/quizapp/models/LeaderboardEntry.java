@@ -11,15 +11,7 @@ public class LeaderboardEntry {
         this.highScore = highScore;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public int getHighScore() {
-        return highScore;
-    }
+    public String getUsername() { return username; }
+    public String getCategoryName() { return categoryName; }
+    public int getHighScore() { return highScore; }
 }

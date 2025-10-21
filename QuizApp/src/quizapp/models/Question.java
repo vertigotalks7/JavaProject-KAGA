@@ -15,21 +15,10 @@ public class Question {
         this.categoryId = categoryId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getQuestionText() {
-        return questionText;
-    }
-
-    public List<Option> getOptions() {
-        return options;
-    }
-
-    public int getCategoryId() {
-        return categoryId;
-    }
+    public int getId() { return id; }
+    public String getQuestionText() { return questionText; }
+    public List<Option> getOptions() { return options; } // Now mutable for DAO convenience
+    public int getCategoryId() { return categoryId; }
 
     public Option getCorrectOption() {
         for (Option option : options) {

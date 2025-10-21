@@ -51,6 +51,7 @@ public class LoginPanel extends JPanel {
         JPanel leftPanel = new JPanel();
         JPanel rightPanel = new JPanel();
 
+        // Left (Login Form) Panel
         leftPanel.setBackground(Theme.BACKGROUND_DARK);
         leftPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
@@ -86,6 +87,7 @@ public class LoginPanel extends JPanel {
         gbc.gridy++; gbc.gridwidth = 2; leftPanel.add(loginButton, gbc);
         gbc.gridy++; leftPanel.add(signupButton, gbc);
 
+        // Right (Image) Panel
         rightPanel.setBackground(Color.WHITE);
         rightPanel.setLayout(new GridBagLayout());
         JLabel imageLabel = new JLabel();
@@ -93,6 +95,7 @@ public class LoginPanel extends JPanel {
             imageLabel.setIcon(new ImageIcon(getClass().getResource("/icons/8899732.png")));
         } catch (Exception e) {
             imageLabel.setText("Image not found");
+            System.err.println("Login image not found: /icons/8899732.png. Error: " + e.getMessage());
         }
         rightPanel.add(imageLabel);
 

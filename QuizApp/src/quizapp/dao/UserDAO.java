@@ -31,6 +31,7 @@ public class UserDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("Error finding user by email: " + e.getMessage());
             e.printStackTrace();
         }
         return Optional.empty();
@@ -47,18 +48,20 @@ public class UserDAO {
                 users.add(new User(
                         rs.getInt("id"),
                         rs.getString("username"),
-                        rs.getString("password"),
+                        rs.getString("password"), // Be cautious about loading passwords unnecessarily
                         rs.getString("email"),
                         rs.getBoolean("isAdmin")
                 ));
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching all users: " + e.getMessage());
             e.printStackTrace();
         }
         return users;
     }
 
     public void saveUser(String username, String email, String password, boolean isAdmin) {
+        // Consider using password hashing here in a real application
         String sql = "INSERT INTO users (username, email, password, isAdmin) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -70,6 +73,7 @@ public class UserDAO {
             stmt.executeUpdate();
 
         } catch (SQLException e) {
+            System.err.println("Error saving user: " + e.getMessage());
             e.printStackTrace();
         }
     }

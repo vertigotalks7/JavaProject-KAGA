@@ -5,7 +5,7 @@ import quizapp.models.QuizResult;
 import quizapp.models.User;
 import quizapp.services.QuizService;
 import quizapp.services.UserService;
-import quizapp.views.*;
+import quizapp.views.*; // Import all views
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,6 +18,7 @@ public class MainApp extends JFrame {
     private QuizService quizService;
     private User currentUser;
 
+    // Panels
     private LoginPanel loginPanel;
     private RegistrationPanel registrationPanel;
     private DashboardPanel dashboardPanel;
@@ -28,6 +29,7 @@ public class MainApp extends JFrame {
     private LeaderboardPanel leaderboardPanel;
     private AdminPanel adminPanel;
 
+    // Dialogs (managed here)
     private UserManagementDialog userManagementDialog;
 
     public MainApp() {
@@ -37,11 +39,13 @@ public class MainApp extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
+        // Initialization
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
         userService = new UserService();
         quizService = new QuizService();
 
+        // Create Panel Instances
         loginPanel = new LoginPanel(this);
         registrationPanel = new RegistrationPanel(this);
         dashboardPanel = new DashboardPanel(this);
@@ -52,6 +56,7 @@ public class MainApp extends JFrame {
         leaderboardPanel = new LeaderboardPanel(this);
         adminPanel = new AdminPanel(this);
 
+        // Add Panels to CardLayout
         mainPanel.add(loginPanel, "login");
         mainPanel.add(registrationPanel, "register");
         mainPanel.add(dashboardPanel, "dashboard");
@@ -63,34 +68,38 @@ public class MainApp extends JFrame {
         mainPanel.add(adminPanel, "admin");
 
         add(mainPanel);
-        cardLayout.show(mainPanel, "login");
+        cardLayout.show(mainPanel, "login"); // Start at login
     }
 
+    // --- Navigation ---
     public void showPanel(String panelName) {
+        // Refresh data dynamically when certain panels are shown
         switch (panelName) {
             case "profile":
                 if (currentUser != null) profilePanel.updateProfileInfo(currentUser);
                 break;
             case "history":
-                historyPanel.populateHistory();
+                if (currentUser != null) historyPanel.populateHistory(); // Check user login
                 break;
             case "leaderboard":
                 leaderboardPanel.populateLeaderboard();
                 break;
             case "admin":
-                // The admin panel is now static, so no refresh needed here
+                // Admin panel is now static, dialogs handle their own refresh
                 break;
         }
         cardLayout.show(mainPanel, panelName);
     }
 
+    // --- Dialog Management ---
     public void openUserManagementDialog() {
         if (userManagementDialog == null) {
             userManagementDialog = new UserManagementDialog(this);
         }
-        userManagementDialog.setVisible(true);
+        userManagementDialog.setVisible(true); // Show the existing or new dialog
     }
 
+    // --- Quiz Flow ---
     public void startQuiz(Category category) {
         quizPanel.startQuiz(category);
         showPanel("quiz");
@@ -101,6 +110,7 @@ public class MainApp extends JFrame {
         showPanel("results");
     }
 
+    // --- User Session ---
     public void loginUser(User user) {
         this.currentUser = user;
         dashboardPanel.updateForNewUser(user);
@@ -110,14 +120,17 @@ public class MainApp extends JFrame {
     public void logoutUser() {
         this.currentUser = null;
         loginPanel.clearFields();
+        profilePanel.updateProfileInfo(null); // Clear profile panel
         showPanel("login");
     }
 
+    // --- Getters ---
     public User getCurrentUser() { return currentUser; }
     public UserService getUserService() { return userService; }
     public QuizService getQuizService() { return quizService; }
-    public LoginPanel getLoginPanel() { return loginPanel; }
+    public LoginPanel getLoginPanel() { return loginPanel; } // Useful for registration
 
+    // --- Entry Point ---
     public static void main(String[] args) {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -127,4 +140,3 @@ public class MainApp extends JFrame {
         SwingUtilities.invokeLater(() -> new MainApp().setVisible(true));
     }
 }
-

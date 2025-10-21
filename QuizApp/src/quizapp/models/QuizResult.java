@@ -2,6 +2,9 @@ package quizapp.models;
 
 import java.sql.Timestamp;
 
+/**
+ * Stores the outcome of a single quiz attempt by a user.
+ */
 public class QuizResult {
     private final int userId;
     private final int categoryId;
@@ -19,10 +22,27 @@ public class QuizResult {
         this.dateTaken = dateTaken;
     }
 
-    public int getUserId() { return userId; }
-    public int getCategoryId() { return categoryId; }
-    public int getScore() { return score; }
-    public int getTotalQuestions() { return totalQuestions; }
-    public Timestamp getDateTaken() { return dateTaken; }
-    public String getCategoryName() { return categoryName; }
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public int getTotalQuestions() {
+        return totalQuestions;
+    }
+
+    public Timestamp getDateTaken() {
+        return dateTaken;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
 }

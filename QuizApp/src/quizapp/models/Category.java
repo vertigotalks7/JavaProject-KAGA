@@ -9,16 +9,9 @@ public class Category {
         this.name = name;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
+    public int getId() { return id; }
+    public String getName() { return name; }
 
     @Override
-    public String toString() {
-        return name;
-    }
+    public String toString() { return name; } // Important for JComboBox display
 }

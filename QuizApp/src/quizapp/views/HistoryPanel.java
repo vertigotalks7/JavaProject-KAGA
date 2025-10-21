@@ -48,7 +48,7 @@ public class HistoryPanel extends JPanel {
 
         JTableHeader header = historyTable.getTableHeader();
         header.setFont(Theme.getFont(Theme.FONT_BODY_BOLD));
-        header.setBackground(Theme.TABLE_HEADER_BG); // Use new theme color
+        header.setBackground(Theme.TABLE_HEADER_BG); // Use theme color
         header.setForeground(Theme.SIDEBAR_BUTTON_TEXT);
 
         JScrollPane scrollPane = new JScrollPane(historyTable);
@@ -63,7 +63,13 @@ public class HistoryPanel extends JPanel {
     }
 
     public void populateHistory() {
-        tableModel.setRowCount(0);
+        tableModel.setRowCount(0); // Clear previous results
+
+        if (mainApp.getCurrentUser() == null) {
+            tableModel.addRow(new Object[]{"Please log in to view history.", "", ""});
+            return;
+        }
+
         List<QuizResult> results = mainApp.getQuizService().getHistoryForUser(mainApp.getCurrentUser());
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 

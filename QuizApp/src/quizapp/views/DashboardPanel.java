@@ -86,11 +86,16 @@ public class DashboardPanel extends JPanel {
         mainContentPanel = new JPanel(mainContentLayout);
         mainContentPanel.setOpaque(false);
 
-        quizSelectionPanel = new JPanel(new GridLayout(2, 2, 20, 20));
+        // Use a scroll pane in case there are many categories
+        quizSelectionPanel = new JPanel(new GridLayout(2, 2, 20, 20)); // Keep 2x2 grid
         quizSelectionPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         quizSelectionPanel.setOpaque(false);
+        JScrollPane quizScrollPane = new JScrollPane(quizSelectionPanel);
+        quizScrollPane.setOpaque(false);
+        quizScrollPane.getViewport().setOpaque(false);
+        quizScrollPane.setBorder(null);
 
-        mainContentPanel.add(new JScrollPane(quizSelectionPanel), "quiz");
+        mainContentPanel.add(quizScrollPane, "quiz"); // Add scroll pane instead of panel directly
 
         contentArea.add(mainContentPanel, BorderLayout.CENTER);
         mainContentLayout.show(mainContentPanel, "quiz");
@@ -122,7 +127,8 @@ public class DashboardPanel extends JPanel {
             }
         });
 
-        if (cardName != null) {
+        // Navigate within the dashboard's CardLayout if cardName is provided
+        if (cardName != null && mainContentPanel != null) {
             button.addActionListener(e -> mainContentLayout.show(mainContentPanel, cardName));
         }
         return button;
@@ -132,20 +138,34 @@ public class DashboardPanel extends JPanel {
         quizSelectionPanel.removeAll();
         List<Category> categories = mainApp.getQuizService().getCategories();
 
+        // Dynamically adjust grid layout based on number of categories
+        int numCategories = categories.size();
+        int rows = (int) Math.ceil(numCategories / 2.0); // Keep 2 columns, adjust rows
+        quizSelectionPanel.setLayout(new GridLayout(rows, 2, 20, 20));
+
         for (Category category : categories) {
             StyledButton subjectBtn = new StyledButton(category.getName());
             subjectBtn.setFont(Theme.getFont(Theme.FONT_HEADER));
 
             String iconPath = getIconPathForCategory(category.getName());
             try {
-                ImageIcon icon = new ImageIcon(new ImageIcon(getClass().getResource(iconPath))
-                        .getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
-                subjectBtn.setIcon(icon);
+                // Ensure icon path starts with '/' for getResource
+                if (!iconPath.isEmpty() && !iconPath.startsWith("/")) {
+                    iconPath = "/" + iconPath;
+                }
+                if (!iconPath.isEmpty()) {
+                    ImageIcon icon = new ImageIcon(new ImageIcon(getClass().getResource(iconPath))
+                            .getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH));
+                    subjectBtn.setIcon(icon);
+                }
             } catch (Exception e) {
-                System.err.println("Icon not found for: " + category.getName() + " at path " + iconPath);
+                System.err.println("Icon not found for: " + category.getName() + " at path " + iconPath + ". Error: " + e.getMessage());
+                // Optionally set default icon or text
+                subjectBtn.setIcon(null);
             }
             subjectBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
             subjectBtn.setHorizontalTextPosition(SwingConstants.CENTER);
+            subjectBtn.setPreferredSize(new Dimension(200, 150)); // Give buttons a decent size
 
             subjectBtn.addActionListener(e -> mainApp.startQuiz(category));
             quizSelectionPanel.add(subjectBtn);
@@ -155,24 +175,22 @@ public class DashboardPanel extends JPanel {
     }
 
     private String getIconPathForCategory(String categoryName) {
+        // Ensure consistent path format
         switch (categoryName.toLowerCase()) {
-            case "c programming":
-                return "/icons/c.jpg";
-            case "algorithmic thinking with python":
-                return "/icons/atp.jpg";
-            case "chemistry":
-                return "/icons/chem.jpg";
-            case "physics":
-                return "/icons/phy.jpg";
-            default:
-                return "";
+            case "c programming": return "/icons/c.png";
+            case "algorithmic thinking with python": return "/icons/atp.png";
+            case "chemistry": return "/icons/chem.png";
+            case "physics": return "/icons/phy.png";
+            default: return "";
         }
     }
 
     public void updateForNewUser(User user) {
         welcomeLabel.setText("Welcome, " + user.getUsername() + "!");
-        adminBtn.setVisible(user.isAdmin());
+        adminBtn.setVisible(user.isAdmin()); // Show/hide based on actual user role
         loadQuizCategories();
-        mainContentLayout.show(mainContentPanel, "quiz");
+        if (mainContentLayout != null) { // Ensure layout manager is initialized
+            mainContentLayout.show(mainContentPanel, "quiz");
+        }
     }
 }

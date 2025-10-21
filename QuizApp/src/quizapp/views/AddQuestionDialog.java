@@ -16,6 +16,9 @@ public class AddQuestionDialog extends JDialog {
 
     private final MainApp mainApp;
     private JComboBox<Category> categoryComboBox;
+    private JTextArea newQuestionText;
+    private JTextField[] optionFields;
+    private JRadioButton[] radioButtons;
 
     public AddQuestionDialog(Frame parent) {
         super(parent, "Add New Question", true);
@@ -41,7 +44,7 @@ public class AddQuestionDialog extends JDialog {
 
         // Question Text
         panel.add(createLabel("Question Text:"));
-        JTextArea newQuestionText = new JTextArea(4, 30);
+        newQuestionText = new JTextArea(4, 30);
         newQuestionText.setFont(Theme.getFont(Theme.FONT_BODY));
         newQuestionText.setWrapStyleWord(true);
         newQuestionText.setLineWrap(true);
@@ -50,8 +53,8 @@ public class AddQuestionDialog extends JDialog {
 
         // Options
         panel.add(createLabel("Options (Select the correct one):"));
-        JTextField[] optionFields = new JTextField[4];
-        JRadioButton[] radioButtons = new JRadioButton[4];
+        optionFields = new JTextField[4];
+        radioButtons = new JRadioButton[4];
         ButtonGroup optionGroup = new ButtonGroup();
 
         for (int i = 0; i < 4; i++) {
@@ -69,44 +72,67 @@ public class AddQuestionDialog extends JDialog {
         radioButtons[0].setSelected(true); // Default selection
 
         panel.add(Box.createVerticalStrut(20));
-        StyledButton addQuestionBtn = new StyledButton("Add Question to Database");
-        addQuestionBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
-        addQuestionBtn.addActionListener(e -> {
-            Category selectedCategory = (Category) categoryComboBox.getSelectedItem();
-            if (selectedCategory == null) {
-                JOptionPane.showMessageDialog(this, "Please select a category.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
 
-            String questionText = newQuestionText.getText().trim();
-            if (questionText.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Question text cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        // Buttons at the bottom
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
+        buttonPanel.setOpaque(false);
 
-            List<Option> newOptions = new ArrayList<>();
-            for (int i = 0; i < 4; i++) {
-                String optionText = optionFields[i].getText().trim();
-                if (optionText.isEmpty()) {
-                    JOptionPane.showMessageDialog(this, "All four option fields must be filled.", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                newOptions.add(new Option(optionText, radioButtons[i].isSelected()));
-            }
+        StyledButton addQuestionBtn = new StyledButton("Add Question");
+        addQuestionBtn.addActionListener(e -> addQuestionAction());
 
-            mainApp.getQuizService().addQuestionWithOptions(selectedCategory.getId(), questionText, newOptions);
-            JOptionPane.showMessageDialog(this, "Question added successfully!");
+        StyledButton cancelBtn = new StyledButton("Cancel");
+        cancelBtn.setBackground(Color.GRAY); // Different color for cancel
+        cancelBtn.addActionListener(e -> dispose());
 
-            dispose(); // Close dialog on success
-        });
+        buttonPanel.add(addQuestionBtn);
+        buttonPanel.add(cancelBtn);
 
-        panel.add(addQuestionBtn);
+        panel.add(buttonPanel);
         add(panel);
+    }
+
+    private void addQuestionAction() {
+        Category selectedCategory = (Category) categoryComboBox.getSelectedItem();
+        if (selectedCategory == null) {
+            JOptionPane.showMessageDialog(this, "Please select a category.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String questionText = newQuestionText.getText().trim();
+        if (questionText.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Question text cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<Option> newOptions = new ArrayList<>();
+        int correctIndex = -1;
+        for (int i = 0; i < 4; i++) {
+            String optionText = optionFields[i].getText().trim();
+            if (optionText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "All four option fields must be filled.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+            boolean isCorrect = radioButtons[i].isSelected();
+            if (isCorrect) correctIndex = i; // Track which is correct
+            newOptions.add(new Option(optionText, isCorrect));
+        }
+
+        // Ensure exactly one correct answer is selected
+        if (correctIndex == -1) {
+            JOptionPane.showMessageDialog(this, "Please select one option as the correct answer.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        mainApp.getQuizService().addQuestionWithOptions(selectedCategory.getId(), questionText, newOptions);
+        JOptionPane.showMessageDialog(this, "Question added successfully!");
+
+        dispose(); // Close dialog on success
     }
 
     private JLabel createLabel(String text) {
         JLabel label = new JLabel(text);
         label.setFont(Theme.getFont(Theme.FONT_BODY_BOLD));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT); // Align labels left
         return label;
     }
 

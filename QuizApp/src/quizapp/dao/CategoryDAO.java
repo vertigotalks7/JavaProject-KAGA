@@ -26,6 +26,7 @@ public class CategoryDAO {
                 categories.add(category);
             }
         } catch (SQLException e) {
+            System.err.println("Error fetching categories: " + e.getMessage());
             e.printStackTrace();
         }
         return categories;
@@ -38,17 +39,20 @@ public class CategoryDAO {
             stmt.setString(1, name);
             stmt.executeUpdate();
         } catch (SQLException e) {
+            System.err.println("Error adding category: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     public void deleteCategory(int categoryId) {
+        // Note: Deleting a category will cascade delete questions and options due to FOREIGN KEY constraints
         String sql = "DELETE FROM categories WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, categoryId);
             stmt.executeUpdate();
         } catch (SQLException e) {
+            System.err.println("Error deleting category: " + e.getMessage());
             e.printStackTrace();
         }
     }

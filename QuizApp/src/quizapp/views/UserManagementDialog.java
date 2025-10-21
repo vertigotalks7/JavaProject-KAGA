@@ -17,7 +17,7 @@ public class UserManagementDialog extends JDialog {
     private DefaultListModel<User> userListModel;
 
     public UserManagementDialog(Frame parent) {
-        super(parent, "User Management", true); // true for modal
+        super(parent, "User Management", true); // Ensure parent is Frame
         this.mainApp = (MainApp) parent;
         initComponents();
         setSize(500, 400);
@@ -38,17 +38,19 @@ public class UserManagementDialog extends JDialog {
         userList = new JList<>(userListModel);
         userList.setFont(Theme.getFont(Theme.FONT_BODY));
         userList.setCellRenderer(new UserListCellRenderer());
-        refreshUserList();
+        refreshUserList(); // Load users when dialog opens
         contentPanel.add(new JScrollPane(userList), BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0)); // Use GridLayout for even spacing
         bottomPanel.setOpaque(false);
+        bottomPanel.setBorder(new EmptyBorder(10, 0, 0, 0)); // Add top margin
 
         JButton resetScoreBtn = new StyledButton("Reset History for User");
         resetScoreBtn.addActionListener(e -> resetUserScores());
 
         JButton closeBtn = new StyledButton("Close");
-        closeBtn.addActionListener(e -> dispose()); // Closes the dialog
+        closeBtn.setBackground(Color.GRAY); // Optional: different color for close
+        closeBtn.addActionListener(e -> dispose()); // Simply close the dialog
 
         bottomPanel.add(resetScoreBtn);
         bottomPanel.add(closeBtn);
@@ -68,30 +70,36 @@ public class UserManagementDialog extends JDialog {
     private void resetUserScores() {
         User selectedUser = userList.getSelectedValue();
         if (selectedUser == null) {
-            JOptionPane.showMessageDialog(this, "Please select a user to reset.", "Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Please select a user to reset.", "No User Selected", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Are you sure you want to delete all quiz history for '" + selectedUser.getUsername() + "'?\nThis action cannot be undone.",
-                "Confirm Score Reset", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+                "Delete ALL quiz history for '" + selectedUser.getUsername() + "'?\nThis action cannot be undone.",
+                "Confirm Score Reset",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
             mainApp.getQuizService().deleteResultsForUser(selectedUser.getId());
             JOptionPane.showMessageDialog(this, "Score history for " + selectedUser.getUsername() + " has been reset.", "Success", JOptionPane.INFORMATION_MESSAGE);
+            // Optionally, refresh leaderboard or history if they are currently visible in the main app
         }
     }
 
+    // Custom renderer to display user info cleanly in the JList
     private static class UserListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            // Use default renderer for selection colors etc.
+            Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof User) {
                 User user = (User) value;
                 String role = user.isAdmin() ? " (Admin)" : "";
-                setText(user.getUsername() + " - " + user.getEmail() + role);
+                // Use User's toString method for consistent display
+                setText(user.toString());
             }
-            return this;
+            return comp;
         }
     }
 }

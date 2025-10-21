@@ -43,12 +43,12 @@ public class LeaderboardPanel extends JPanel {
         leaderboardTable.setFont(Theme.getFont(Theme.FONT_BODY));
         leaderboardTable.setRowHeight(30);
         leaderboardTable.setGridColor(Color.LIGHT_GRAY);
-        leaderboardTable.getColumnModel().getColumn(0).setMaxWidth(80);
+        leaderboardTable.getColumnModel().getColumn(0).setMaxWidth(80); // Rank column
         leaderboardTable.setFillsViewportHeight(true);
 
         JTableHeader header = leaderboardTable.getTableHeader();
         header.setFont(Theme.getFont(Theme.FONT_BODY_BOLD));
-        header.setBackground(Theme.TABLE_HEADER_BG); // Use new theme color
+        header.setBackground(Theme.TABLE_HEADER_BG); // Use theme color
         header.setForeground(Theme.SIDEBAR_BUTTON_TEXT);
 
         JScrollPane scrollPane = new JScrollPane(leaderboardTable);
@@ -63,7 +63,7 @@ public class LeaderboardPanel extends JPanel {
     }
 
     public void populateLeaderboard() {
-        tableModel.setRowCount(0);
+        tableModel.setRowCount(0); // Clear previous results
         List<LeaderboardEntry> topScores = mainApp.getQuizService().getLeaderboard();
 
         if (topScores.isEmpty()) {
