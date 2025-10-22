@@ -29,7 +29,6 @@ public class DashboardPanel extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // ===== Sidebar =====
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
         sidebar.setPreferredSize(new Dimension(220, 0));
@@ -73,7 +72,6 @@ public class DashboardPanel extends JPanel {
         logoutBtn.addActionListener(e -> mainApp.logoutUser());
         sidebar.add(logoutBtn);
 
-        // ===== Main Content Area =====
         JPanel contentArea = new JPanel(new BorderLayout(10, 10));
         contentArea.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         contentArea.setBackground(Color.WHITE);
@@ -86,7 +84,6 @@ public class DashboardPanel extends JPanel {
         mainContentPanel = new JPanel(mainContentLayout);
         mainContentPanel.setOpaque(false);
 
-        // Use a scroll pane in case there are many categories
         quizSelectionPanel = new JPanel(new GridLayout(2, 2, 20, 20)); // Keep 2x2 grid
         quizSelectionPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         quizSelectionPanel.setOpaque(false);
@@ -95,7 +92,7 @@ public class DashboardPanel extends JPanel {
         quizScrollPane.getViewport().setOpaque(false);
         quizScrollPane.setBorder(null);
 
-        mainContentPanel.add(quizScrollPane, "quiz"); // Add scroll pane instead of panel directly
+        mainContentPanel.add(quizScrollPane, "quiz");
 
         contentArea.add(mainContentPanel, BorderLayout.CENTER);
         mainContentLayout.show(mainContentPanel, "quiz");
@@ -127,7 +124,6 @@ public class DashboardPanel extends JPanel {
             }
         });
 
-        // Navigate within the dashboard's CardLayout if cardName is provided
         if (cardName != null && mainContentPanel != null) {
             button.addActionListener(e -> mainContentLayout.show(mainContentPanel, cardName));
         }
@@ -138,9 +134,8 @@ public class DashboardPanel extends JPanel {
         quizSelectionPanel.removeAll();
         List<Category> categories = mainApp.getQuizService().getCategories();
 
-        // Dynamically adjust grid layout based on number of categories
         int numCategories = categories.size();
-        int rows = (int) Math.ceil(numCategories / 2.0); // Keep 2 columns, adjust rows
+        int rows = (int) Math.ceil(numCategories / 2.0);
         quizSelectionPanel.setLayout(new GridLayout(rows, 2, 20, 20));
 
         for (Category category : categories) {
@@ -149,7 +144,6 @@ public class DashboardPanel extends JPanel {
 
             String iconPath = getIconPathForCategory(category.getName());
             try {
-                // Ensure icon path starts with '/' for getResource
                 if (!iconPath.isEmpty() && !iconPath.startsWith("/")) {
                     iconPath = "/" + iconPath;
                 }
@@ -160,7 +154,6 @@ public class DashboardPanel extends JPanel {
                 }
             } catch (Exception e) {
                 System.err.println("Icon not found for: " + category.getName() + " at path " + iconPath + ". Error: " + e.getMessage());
-                // Optionally set default icon or text
                 subjectBtn.setIcon(null);
             }
             subjectBtn.setVerticalTextPosition(SwingConstants.BOTTOM);
@@ -175,7 +168,6 @@ public class DashboardPanel extends JPanel {
     }
 
     private String getIconPathForCategory(String categoryName) {
-        // Ensure consistent path format
         switch (categoryName.toLowerCase()) {
             case "c programming": return "/icons/c.png";
             case "algorithmic thinking with python": return "/icons/atp.png";
@@ -187,9 +179,9 @@ public class DashboardPanel extends JPanel {
 
     public void updateForNewUser(User user) {
         welcomeLabel.setText("Welcome, " + user.getUsername() + "!");
-        adminBtn.setVisible(user.isAdmin()); // Show/hide based on actual user role
+        adminBtn.setVisible(user.isAdmin());
         loadQuizCategories();
-        if (mainContentLayout != null) { // Ensure layout manager is initialized
+        if (mainContentLayout != null) {
             mainContentLayout.show(mainContentPanel, "quiz");
         }
     }

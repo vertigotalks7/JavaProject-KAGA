@@ -17,7 +17,7 @@ public class UserManagementDialog extends JDialog {
     private DefaultListModel<User> userListModel;
 
     public UserManagementDialog(Frame parent) {
-        super(parent, "User Management", true); // Ensure parent is Frame
+        super(parent, "User Management", true);
         this.mainApp = (MainApp) parent;
         initComponents();
         setSize(500, 400);
@@ -38,20 +38,19 @@ public class UserManagementDialog extends JDialog {
         userList = new JList<>(userListModel);
         userList.setFont(Theme.getFont(Theme.FONT_BODY));
         userList.setCellRenderer(new UserListCellRenderer());
-        refreshUserList(); // Load users when dialog opens
+        refreshUserList();
         contentPanel.add(new JScrollPane(userList), BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0)); // Use GridLayout for even spacing
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         bottomPanel.setOpaque(false);
-        bottomPanel.setBorder(new EmptyBorder(10, 0, 0, 0)); // Add top margin
+        bottomPanel.setBorder(new EmptyBorder(10, 0, 0, 0));
 
         JButton resetScoreBtn = new StyledButton("Reset History for User");
         resetScoreBtn.addActionListener(e -> resetUserScores());
 
         JButton closeBtn = new StyledButton("Close");
-        closeBtn.setBackground(Color.GRAY); // Optional: different color for close
-        closeBtn.addActionListener(e -> dispose()); // Simply close the dialog
-
+        closeBtn.setBackground(Color.GRAY);
+        closeBtn.addActionListener(e -> dispose());
         bottomPanel.add(resetScoreBtn);
         bottomPanel.add(closeBtn);
         contentPanel.add(bottomPanel, BorderLayout.SOUTH);
@@ -83,20 +82,16 @@ public class UserManagementDialog extends JDialog {
         if (confirm == JOptionPane.YES_OPTION) {
             mainApp.getQuizService().deleteResultsForUser(selectedUser.getId());
             JOptionPane.showMessageDialog(this, "Score history for " + selectedUser.getUsername() + " has been reset.", "Success", JOptionPane.INFORMATION_MESSAGE);
-            // Optionally, refresh leaderboard or history if they are currently visible in the main app
         }
     }
 
-    // Custom renderer to display user info cleanly in the JList
     private static class UserListCellRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            // Use default renderer for selection colors etc.
             Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof User) {
                 User user = (User) value;
                 String role = user.isAdmin() ? " (Admin)" : "";
-                // Use User's toString method for consistent display
                 setText(user.toString());
             }
             return comp;

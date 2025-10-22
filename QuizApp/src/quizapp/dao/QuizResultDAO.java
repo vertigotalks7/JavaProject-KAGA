@@ -62,7 +62,6 @@ public class QuizResultDAO {
 
     public List<LeaderboardEntry> getTopScores(int limit) {
         List<LeaderboardEntry> topScores = new ArrayList<>();
-        // Gets the single highest score per user per category for leaderboard clarity
         String sql = "SELECT u.username, r.category_name, MAX(r.score) AS high_score " +
                 "FROM quiz_results r " +
                 "JOIN users u ON r.user_id = u.id " +
@@ -91,14 +90,13 @@ public class QuizResultDAO {
     }
 
     public void deleteResultsForUser(int userId) {
-        // This will delete both overall results and individual answers due to CASCADE
         String sql = "DELETE FROM quiz_results WHERE user_id = ?";
-        String sqlAnswers = "DELETE FROM user_answers WHERE user_id = ?"; // Also delete individual answers
+        String sqlAnswers = "DELETE FROM user_answers WHERE user_id = ?";
 
         Connection conn = null;
         try {
             conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false); // Use transaction
+            conn.setAutoCommit(false);
 
             try(PreparedStatement stmt = conn.prepareStatement(sql)){
                 stmt.setInt(1, userId);

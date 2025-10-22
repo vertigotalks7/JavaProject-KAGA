@@ -34,7 +34,6 @@ public class AddQuestionDialog extends JDialog {
         panel.setBackground(Color.WHITE);
         panel.setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // Category Selection
         panel.add(createLabel("Select Category:"));
         categoryComboBox = new JComboBox<>();
         categoryComboBox.setFont(Theme.getFont(Theme.FONT_BODY));
@@ -42,7 +41,6 @@ public class AddQuestionDialog extends JDialog {
         panel.add(categoryComboBox);
         panel.add(Box.createVerticalStrut(15));
 
-        // Question Text
         panel.add(createLabel("Question Text:"));
         newQuestionText = new JTextArea(4, 30);
         newQuestionText.setFont(Theme.getFont(Theme.FONT_BODY));
@@ -51,7 +49,6 @@ public class AddQuestionDialog extends JDialog {
         panel.add(new JScrollPane(newQuestionText));
         panel.add(Box.createVerticalStrut(15));
 
-        // Options
         panel.add(createLabel("Options (Select the correct one):"));
         optionFields = new JTextField[4];
         radioButtons = new JRadioButton[4];
@@ -69,11 +66,10 @@ public class AddQuestionDialog extends JDialog {
             panel.add(optionPanel);
             panel.add(Box.createVerticalStrut(5));
         }
-        radioButtons[0].setSelected(true); // Default selection
+        radioButtons[0].setSelected(true);
 
         panel.add(Box.createVerticalStrut(20));
 
-        // Buttons at the bottom
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
         buttonPanel.setOpaque(false);
 
@@ -113,11 +109,10 @@ public class AddQuestionDialog extends JDialog {
                 return;
             }
             boolean isCorrect = radioButtons[i].isSelected();
-            if (isCorrect) correctIndex = i; // Track which is correct
+            if (isCorrect) correctIndex = i;
             newOptions.add(new Option(optionText, isCorrect));
         }
 
-        // Ensure exactly one correct answer is selected
         if (correctIndex == -1) {
             JOptionPane.showMessageDialog(this, "Please select one option as the correct answer.", "Error", JOptionPane.ERROR_MESSAGE);
             return;

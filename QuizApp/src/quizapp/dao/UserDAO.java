@@ -61,7 +61,6 @@ public class UserDAO {
     }
 
     public void saveUser(String username, String email, String password, boolean isAdmin) {
-        // Consider using password hashing here in a real application
         String sql = "INSERT INTO users (username, email, password, isAdmin) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

@@ -45,7 +45,6 @@ public class CategoryDAO {
     }
 
     public void deleteCategory(int categoryId) {
-        // Note: Deleting a category will cascade delete questions and options due to FOREIGN KEY constraints
         String sql = "DELETE FROM categories WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {

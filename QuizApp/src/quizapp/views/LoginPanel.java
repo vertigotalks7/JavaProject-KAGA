@@ -51,7 +51,6 @@ public class LoginPanel extends JPanel {
         JPanel leftPanel = new JPanel();
         JPanel rightPanel = new JPanel();
 
-        // Left (Login Form) Panel
         leftPanel.setBackground(Theme.BACKGROUND_DARK);
         leftPanel.setLayout(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();

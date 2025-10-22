@@ -40,18 +40,15 @@ public class ProfilePanel extends JPanel {
         setBackground(Color.WHITE);
         setBorder(new EmptyBorder(20, 20, 20, 20));
 
-        // --- Top Panel: Avatar, User Info, Category Selector ---
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 0));
         topPanel.setOpaque(false);
 
-        // Avatar
         avatarLabel = new JLabel();
         avatarLabel.setPreferredSize(new Dimension(80, 80));
         avatarLabel.setHorizontalAlignment(SwingConstants.CENTER);
         avatarLabel.setVerticalAlignment(SwingConstants.CENTER);
         avatarLabel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
 
-        // User Info Panel
         JPanel userInfoPanel = new JPanel();
         userInfoPanel.setOpaque(false);
         userInfoPanel.setLayout(new BoxLayout(userInfoPanel, BoxLayout.Y_AXIS));
@@ -62,7 +59,6 @@ public class ProfilePanel extends JPanel {
         userInfoPanel.add(usernameLabel);
         userInfoPanel.add(emailLabel);
 
-        // Category Selector
         categoryComboBox = new JComboBox<>();
         categoryComboBox.setFont(Theme.getFont(Theme.FONT_BODY));
         categoryComboBox.addActionListener(e -> updateStats());
@@ -73,12 +69,10 @@ public class ProfilePanel extends JPanel {
         topPanel.add(new JLabel("View Stats for:"));
         topPanel.add(categoryComboBox);
 
-        // --- Center Panel: Stats and Chart ---
         JPanel centerPanel = new JPanel(new BorderLayout(30, 10));
         centerPanel.setOpaque(false);
         centerPanel.setBorder(new EmptyBorder(20, 0, 20, 0));
 
-        // Stats Labels Panel (Left side)
         JPanel statsLabelPanel = new JPanel();
         statsLabelPanel.setOpaque(false);
         statsLabelPanel.setLayout(new BoxLayout(statsLabelPanel, BoxLayout.Y_AXIS));
@@ -100,7 +94,6 @@ public class ProfilePanel extends JPanel {
         statsLabelPanel.add(wrongLabel);
         statsLabelPanel.add(Box.createVerticalGlue());
 
-        // Chart Container Panel (Right side)
         chartContainerPanel = new JPanel(new BorderLayout());
         chartContainerPanel.setOpaque(false);
         chartContainerPanel.setPreferredSize(new Dimension(350, 350));
@@ -108,7 +101,6 @@ public class ProfilePanel extends JPanel {
         centerPanel.add(statsLabelPanel, BorderLayout.WEST);
         centerPanel.add(chartContainerPanel, BorderLayout.CENTER);
 
-        // --- Bottom Panel: Back Button ---
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setOpaque(false);
         JButton backButton = new StyledButton("Back to Dashboard");
@@ -125,7 +117,6 @@ public class ProfilePanel extends JPanel {
             usernameLabel.setText(user.getUsername());
             emailLabel.setText(user.getEmail());
 
-            // Update Avatar
             try {
                 ImageIcon icon = new ImageIcon(getClass().getResource("/icons/default_avatar.png"));
                 Image img = icon.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
@@ -137,7 +128,6 @@ public class ProfilePanel extends JPanel {
                 System.err.println("Default avatar image not found in /icons/default_avatar.png");
             }
 
-            // Refresh category dropdown
             categoryComboBox.removeAllItems();
             List<Category> categories = mainApp.getQuizService().getCategories();
             for (Category cat : categories) {
@@ -146,11 +136,10 @@ public class ProfilePanel extends JPanel {
             if (!categories.isEmpty()) {
                 categoryComboBox.setSelectedIndex(0);
             } else {
-                updateStats(); // Update stats even if no categories
+                updateStats();
             }
 
         } else {
-            // Clear fields if user is null
             usernameLabel.setText("N/A");
             emailLabel.setText("");
             categoryComboBox.removeAllItems();

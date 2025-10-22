@@ -12,14 +12,10 @@ import java.util.Map;
 
 public class QuestionDAO {
 
-    /**
-     * Retrieves questions for a category, including options, using a single JOIN.
-     * Use Integer.MAX_VALUE for limit to get all questions.
-     */
+
     public List<Question> getQuestionsForCategory(int categoryId, int limit) {
         Map<Integer, Question> questionMap = new LinkedHashMap<>(); // Preserves random order
 
-        // Subquery ensures LIMIT applies *before* JOIN, crucial for performance and correctness
         String sql = "SELECT q.id AS question_id, q.question_text, q.category_id, o.option_text, o.is_correct " +
                 "FROM (SELECT * FROM questions WHERE category_id = ? ORDER BY RAND() LIMIT ?) AS q " +
                 "JOIN options o ON q.id = o.question_id";
@@ -28,13 +24,12 @@ public class QuestionDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, categoryId);
-            stmt.setInt(2, limit); // Use the passed limit
+            stmt.setInt(2, limit);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     int qId = rs.getInt("question_id");
 
-                    // Add question to map if not already present
                     Question question = questionMap.computeIfAbsent(qId, k -> {
                         try {
                             return new Question(
@@ -48,7 +43,6 @@ public class QuestionDAO {
                         }
                     });
 
-                    // Add the current option to the question's list
                     Option option = new Option(
                             rs.getString("option_text"),
                             rs.getBoolean("is_correct")
@@ -63,9 +57,7 @@ public class QuestionDAO {
         return new ArrayList<>(questionMap.values());
     }
 
-    /**
-     * Deletes a question and its associated options (due to CASCADE constraint).
-     */
+
     public void deleteQuestion(int questionId) {
         String sql = "DELETE FROM questions WHERE id = ?";
         try (Connection conn = DatabaseManager.getConnection();
@@ -88,10 +80,9 @@ public class QuestionDAO {
 
         try {
             conn = DatabaseManager.getConnection();
-            conn.setAutoCommit(false); // Start transaction
+            conn.setAutoCommit(false);
 
             int questionId;
-            // Insert question, get generated ID
             try (PreparedStatement questionStmt = conn.prepareStatement(questionSql, Statement.RETURN_GENERATED_KEYS)) {
                 questionStmt.setInt(1, categoryId);
                 questionStmt.setString(2, questionText);
@@ -106,7 +97,6 @@ public class QuestionDAO {
                 }
             }
 
-            // Insert options using batching
             try (PreparedStatement optionStmt = conn.prepareStatement(optionSql)) {
                 for (Option option : options) {
                     optionStmt.setInt(1, questionId);
@@ -117,14 +107,14 @@ public class QuestionDAO {
                 optionStmt.executeBatch();
             }
 
-            conn.commit(); // Commit if all inserts succeed
+            conn.commit();
 
         } catch (SQLException e) {
             System.err.println("Error adding question with options: " + e.getMessage());
             if (conn != null) {
                 try {
                     System.err.println("Transaction is being rolled back.");
-                    conn.rollback(); // Rollback on error
+                    conn.rollback();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -133,7 +123,7 @@ public class QuestionDAO {
         } finally {
             if (conn != null) {
                 try {
-                    conn.setAutoCommit(true); // Restore default behavior
+                    conn.setAutoCommit(true);
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }

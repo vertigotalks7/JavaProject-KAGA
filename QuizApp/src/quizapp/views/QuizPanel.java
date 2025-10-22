@@ -1,7 +1,7 @@
 package quizapp.views;
 
 import quizapp.MainApp;
-import quizapp.models.*; // Import UserAnswer
+import quizapp.models.*;
 import quizapp.utils.Theme;
 import quizapp.views.components.StyledButton;
 
@@ -17,7 +17,7 @@ import java.util.Map;
 
 public class QuizPanel extends JPanel {
 
-    private static final int QUIZ_TIME_SECONDS = 300; // 5 minutes
+    private static final int QUIZ_TIME_SECONDS = 300;
     private static final int QUESTIONS_PER_QUIZ = 15;
 
     private final MainApp mainApp;
@@ -66,7 +66,6 @@ public class QuizPanel extends JPanel {
         setBackground(Color.WHITE);
         setBorder(new EmptyBorder(20, 40, 40, 40));
 
-        // --- Top Panel ---
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setOpaque(false);
         questionNumberLabel = new JLabel();
@@ -76,7 +75,6 @@ public class QuizPanel extends JPanel {
         topPanel.add(questionNumberLabel, BorderLayout.WEST);
         topPanel.add(timerLabel, BorderLayout.EAST);
 
-        // --- Center Panel ---
         JPanel centerPanel = new JPanel(new BorderLayout(20, 20));
         centerPanel.setOpaque(false);
         questionTextArea = new JTextArea();
@@ -92,7 +90,6 @@ public class QuizPanel extends JPanel {
         centerPanel.add(questionTextArea, BorderLayout.NORTH);
         centerPanel.add(optionsPanel, BorderLayout.CENTER);
 
-        // --- Bottom Navigation Panel ---
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setOpaque(false);
         previousButton = new StyledButton("Previous");
@@ -229,21 +226,19 @@ public class QuizPanel extends JPanel {
         if (quizTimer != null) {
             quizTimer.stop();
         }
-        saveCurrentAnswer(); // Save the final answer
+        saveCurrentAnswer();
 
         int score = 0;
-        List<UserAnswer> answerLog = new ArrayList<>(); // List to hold individual answers
+        List<UserAnswer> answerLog = new ArrayList<>();
 
         for (Question q : questionList) {
             Option userAnswer = userAnswers.get(q);
-            // Default to incorrect if no answer was selected or stored
             boolean wasCorrect = (userAnswer != null && userAnswer.isCorrect());
 
             if (wasCorrect) {
                 score++;
             }
 
-            // Log every answer attempt (even if unanswered, logged as incorrect)
             answerLog.add(new UserAnswer(
                     mainApp.getCurrentUser().getId(),
                     q.getId(),
@@ -252,10 +247,8 @@ public class QuizPanel extends JPanel {
             ));
         }
 
-        // Save the detailed answers to the new user_answers table
         mainApp.getQuizService().saveUserAnswers(answerLog);
 
-        // Save the overall quiz result (as before)
         QuizResult result = new QuizResult(
                 mainApp.getCurrentUser().getId(),
                 currentCategory.getId(),

@@ -92,7 +92,6 @@ public class RegistrationPanel extends JPanel {
         gbc.gridy++; gbc.gridwidth = 2; leftPanel.add(signupButton, gbc);
         gbc.gridy++; leftPanel.add(loginButton, gbc);
 
-        // Right Panel (Image)
         rightPanel.setBackground(Color.WHITE);
         rightPanel.setLayout(new GridBagLayout());
         JLabel imageLabel = new JLabel();
@@ -118,7 +117,6 @@ public class RegistrationPanel extends JPanel {
         String password = new String(passwordField.getPassword()).trim();
         String emailRegex = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"; // Simple email regex
 
-        // Basic Validation
         if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
             JOptionPane.showMessageDialog(this, "All fields are required.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
@@ -127,23 +125,19 @@ public class RegistrationPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please enter a valid email address.", "Invalid Email", JOptionPane.ERROR_MESSAGE);
             return;
         }
-        // Basic password length check (example)
         if (password.length() < 4) {
             JOptionPane.showMessageDialog(this, "Password must be at least 4 characters long.", "Weak Password", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
-        // Check if email is already taken
         if (mainApp.getUserService().isEmailTaken(email)) {
             JOptionPane.showMessageDialog(this, "This email is already registered.", "Registration Failed", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // If validation passes, register the user
         mainApp.getUserService().registerUser(name, email, password);
         JOptionPane.showMessageDialog(this, "Registration successful! Please log in.", "Success", JOptionPane.INFORMATION_MESSAGE);
 
-        // Clear fields and navigate to login, pre-filling email
         nameField.setText("");
         emailField.setText("");
         passwordField.setText("");

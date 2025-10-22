@@ -50,7 +50,6 @@ public class QuizService {
         return quizResultDAO.getStatsForCategory(user.getId(), category.getId());
     }
 
-    // --- Admin Methods ---
     public void addCategory(String name) {
         categoryDAO.addCategory(name);
     }

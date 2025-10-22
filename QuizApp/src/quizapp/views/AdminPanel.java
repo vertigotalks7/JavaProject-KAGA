@@ -25,18 +25,17 @@ public class AdminPanel extends JPanel {
         titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
         add(titleLabel, BorderLayout.NORTH);
 
-        // Panel for the main action buttons
         JPanel buttonPanel = new JPanel(new GridBagLayout());
         buttonPanel.setOpaque(false);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.gridx = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL; // Make buttons same width
-        gbc.weightx = 1.0; // Allow buttons to expand horizontally
+        gbc.weightx = 1.0;
 
         StyledButton addQuestionBtn = new StyledButton("Add New Question");
         addQuestionBtn.setFont(Theme.getFont(Theme.FONT_HEADER));
-        addQuestionBtn.setPreferredSize(new Dimension(300, 60)); // Set preferred size
+        addQuestionBtn.setPreferredSize(new Dimension(300, 60));
         addQuestionBtn.addActionListener(e -> new AddQuestionDialog(mainApp).setVisible(true));
 
         StyledButton deleteContentBtn = new StyledButton("Delete Questions or Categories");
@@ -56,13 +55,11 @@ public class AdminPanel extends JPanel {
         gbc.gridy = 2;
         buttonPanel.add(manageUsersBtn, gbc);
 
-        // Add buttonPanel inside another panel to control its vertical position
         JPanel centerWrapper = new JPanel(new GridBagLayout()); // Use GridBagLayout to center vertically
         centerWrapper.setOpaque(false);
         centerWrapper.add(buttonPanel); // Add the panel containing buttons
         add(centerWrapper, BorderLayout.CENTER);
 
-        // Back to Dashboard Button
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         bottomPanel.setOpaque(false);
         JButton backButton = new StyledButton("Back to Dashboard");
@@ -71,6 +68,5 @@ public class AdminPanel extends JPanel {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    // No longer needed here as dialogs handle their own data
     public void refreshData() {}
 }

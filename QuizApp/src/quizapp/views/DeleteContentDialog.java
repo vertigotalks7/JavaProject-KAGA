@@ -17,9 +17,9 @@ public class DeleteContentDialog extends JDialog {
     private final MainApp mainApp;
     private JList<Category> categoryList;
     private DefaultListModel<Category> categoryListModel;
-    private JList<String> questionList; // Displaying question text
+    private JList<String> questionList;
     private DefaultListModel<String> questionListModel;
-    private List<Question> currentQuestions; // Store actual Question objects
+    private List<Question> currentQuestions;
 
     public DeleteContentDialog(Frame parent) {
         super(parent, "Delete Content", true);
@@ -34,7 +34,6 @@ public class DeleteContentDialog extends JDialog {
         contentPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
         contentPanel.setBackground(Color.WHITE);
 
-        // Category Panel
         JPanel categoryPanel = new JPanel(new BorderLayout(5, 5));
         categoryPanel.setOpaque(false);
         categoryPanel.setBorder(createTitledBorder("Categories"));
@@ -43,7 +42,6 @@ public class DeleteContentDialog extends JDialog {
         categoryList = new JList<>(categoryListModel);
         categoryList.setFont(Theme.getFont(Theme.FONT_BODY));
         categoryList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        // Add listener AFTER model is initialized
         categoryList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) { // Prevent double events
                 loadQuestionsForCategory();
@@ -59,7 +57,6 @@ public class DeleteContentDialog extends JDialog {
         categoryPanel.add(new JScrollPane(categoryList), BorderLayout.CENTER);
         categoryPanel.add(categoryButtons, BorderLayout.SOUTH);
 
-        // Question Panel
         JPanel questionPanel = new JPanel(new BorderLayout(5, 5));
         questionPanel.setOpaque(false);
         questionPanel.setBorder(createTitledBorder("Questions in Selected Category"));
@@ -106,8 +103,8 @@ public class DeleteContentDialog extends JDialog {
         for (Category category : categories) {
             categoryListModel.addElement(category);
         }
-        questionListModel.clear(); // Clear questions when refreshing categories
-        currentQuestions = null; // Reset current questions
+        questionListModel.clear();
+        currentQuestions = null;
     }
 
     private void loadQuestionsForCategory() {
@@ -115,7 +112,6 @@ public class DeleteContentDialog extends JDialog {
         currentQuestions = null; // Reset
         Category selectedCategory = categoryList.getSelectedValue();
         if (selectedCategory != null) {
-            // Fetch ALL questions for the selected category for admin view
             currentQuestions = mainApp.getQuizService().getQuestionsForCategory(selectedCategory, Integer.MAX_VALUE);
             for (Question q : currentQuestions) {
                 questionListModel.addElement(q.getQuestionText());
